@@ -1,0 +1,16 @@
+{
+  "name": "ytcloneproject",
+  "version": "1.0.0",
+  "description": "A robust Youtube clone",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Youtube",
+    "fullStack",
+    "backend"
+  ],
+  "author": "Nikhil Anand",
+  "license": "ISC"
+}

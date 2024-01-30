@@ -1,0 +1,3 @@
+## Summary of this Project
+--
+Introducing YTCloneProject: a sophisticated backend masterpiece utilizing Node.js, Express.js, MongoDB, and JWT authentication. Our project mirrors YouTube's functionality, offering seamless user interactions such as login, video uploads, likes, comments, and subscriptions. With meticulous attention to security and industry-standard practices, YTCloneProject is your gateway to mastering modern backend development.
