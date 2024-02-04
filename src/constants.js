@@ -1,1 +1,1 @@
-export const DB_NAME = "ytclone"
+export const DB_NAME = "my_database";

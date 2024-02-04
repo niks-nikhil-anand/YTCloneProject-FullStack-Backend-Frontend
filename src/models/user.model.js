@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 
 const userSchema = Schema(
     {
-        username :{
+        username:{
           type: String,
           required : true ,
           unique : true ,
@@ -12,23 +12,23 @@ const userSchema = Schema(
           lowercase : true ,
           trim : true  
         } ,
-        email : {
+        email: {
             type : String ,
             required : true ,
             unique : true, 
             lowercase : true,
             trim : true
         } ,
-        fullname :{
+        fullName:{
             type : String ,
             required : true ,
         },
         avatar : {
-            type : String ,  // cloudinary
+            type : String ,  
             required : true
         },
-        coverimage : {
-            type : String // cloudinary
+        coverImage : {
+            type : String ,
         },
         watchHistory :{
             type : Schema.Types.ObjectId,
