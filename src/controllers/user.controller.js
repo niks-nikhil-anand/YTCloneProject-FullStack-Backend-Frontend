@@ -186,7 +186,9 @@ const generateAccessAndRefreshToken = async(user_id) => {
     });
     
  
-    const loggedoutUser = asyncHandler(async(req,res)=>{
+    const logoutUser = asyncHandler(async(req,res)=>{
+
+        // find the user in database and update the refresh token to undefined.
         await User.findByIdAndUpdate(
             req.user._id,
             {
@@ -194,6 +196,7 @@ const generateAccessAndRefreshToken = async(user_id) => {
                     refreshToken : undefined
                 }
             },
+            // to get updated value in response.
             {
                 new : true
             }
@@ -203,13 +206,13 @@ const generateAccessAndRefreshToken = async(user_id) => {
             httpOnly : true ,
             secure : true
         }
-
+        // clear the cookies and return
         return res
         .status(200)
-        .clearCookies("accessToken" , options)
-        .clearCookies("refreshToken" , options)
+        .clearCookie("accessToken" , options)
+        .clearCookie("refreshToken" , options)
         .json(
-            new apiResponse(200 , {} , " User Logges out")
+            new apiResponse(200 , {} , "User Logged out")
         )
 })
-export {registerUser , loginUser , loggedoutUser}
+export {registerUser , loginUser , logoutUser}
