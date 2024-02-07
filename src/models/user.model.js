@@ -46,7 +46,7 @@ const userSchema = Schema(
         timestamps : true
     }
 )
-
+// Bcrypt the password - Hash
 userSchema.pre("save" , async function (next){
     if(!this.isModified("password"))  return next()
 
@@ -54,10 +54,14 @@ userSchema.pre("save" , async function (next){
     next()
 })
 
-userSchema.methods.isPAsswordCorrect = async function(password){
-   await bcrypt.compare(password, this.password)
-}
+// To check the password - Bcrypt.compare
 
+userSchema.methods.isPAsswordCorrect = async function(password){
+   return  await bcrypt.compare(password, this.password)
+}
+ 
+
+// Generate the access token using  JsonwebToken(jwt)
 userSchema.methods.generateAccessToken = function (){
     return jwt.sign({
         _id : this._id,
@@ -71,13 +75,15 @@ userSchema.methods.generateAccessToken = function (){
     }
     )
 }
+
+// Generate Refresh Token using Jsonwebtoken(jwt)
 userSchema.methods.generateRefreshToken  = function (){
     return jwt.sign({
         _id : this._id ,
     },
     process.env.REFRESH_TOKEN_SECRET,
     {
-       expiresIn : process.env.REFRESH_TOKEN_SECRET
+       expiresIn : process.env.REFRESH_TOKEN_EXPIRY
     }
     )
 }
