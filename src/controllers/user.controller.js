@@ -217,7 +217,7 @@ const generateAccessAndRefreshToken = async(user_id) => {
         )
 })
 
-export const refreshAccessToken = asyncHandler(async()=>{
+ const refreshAccessToken = asyncHandler(async()=>{
 
 
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
@@ -262,11 +262,89 @@ export const refreshAccessToken = asyncHandler(async()=>{
     } catch (error) {
         throw new apiError(401 , error?.message || "Invalid Refresh Token")
     }
-
-
-
-
-
-    
+   
 })
-export {registerUser , loginUser , logoutUser}
+
+// Change Password 
+const changeCurrentPassword = asyncHandler(async(req,res)=>{
+    const {oldPassword , newPassword }= req.body
+
+    const user = await User.findById(req.user?._id)
+
+    const isPAsswordCorrect = await user.isPAsswordCorrect(oldPassword)
+
+    if (!isPAsswordCorrect) {
+        throw new apiError(400 , "Invalid old password")
+    }
+
+      user.password = newPassword
+    await user.save({validateBeforeSave : true})
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            {},
+            "Password Changed Successfully"
+        )
+    )
+})
+
+
+// Get Current User Data
+
+const getCurrentUser = asyncHandler( async(req , res) =>{
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200 ,
+            req.user ,
+            "User Fetched Successfully"
+        )
+    )
+})
+
+
+// Update fullName and email
+
+const updateAccountDetails = asyncHandler(async(req,res) => {
+    const {fullName , email} = req.body
+
+    if ((!fullName || !email)) {
+        throw new apiError(400 , "All fields are required")
+    }
+
+    const user = User.findByIdAndUpdate(
+        req.body?._id ,
+        {
+            $set :{
+                fullName ,
+                email
+            }
+        },
+        {new : true}
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200 ,
+            user ,
+            "Account Details Updated Succesfully"
+        )
+    )
+
+})
+
+
+export {
+    registerUser ,
+    loginUser , 
+    logoutUser ,
+    refreshAccessToken,
+    changeCurrentPassword ,
+    getCurrentUser
+    }
