@@ -316,7 +316,7 @@ const updateAccountDetails = asyncHandler(async(req,res) => {
         throw new apiError(400 , "All fields are required")
     }
 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.body?._id ,
         {
             $set :{
@@ -407,6 +407,80 @@ const updateUserCoverImage = asyncHandler(async (req , res) =>{
 })
 
 
+// MongoDB aggreation Pipeline
+const getUserChannelProfile = asyncHandler( async(req,res) =>{
+
+    const {username} = req.params
+
+    if (!username?.trim()) {
+        throw new apiError(400 , "username is missing")
+    }
+
+    const channel = await User.aggregate([
+        {
+          $match: {
+            username : username?.toLowerCase()
+          } 
+        },
+        {
+            $lookup :{
+                from : "subscriptions" ,
+                localField : "_id" ,
+                foreignField: "channel",
+                as : "subscribers"
+            }
+        },
+        {
+            $lookup :{
+                from : "subscriptions" ,
+                localField : "_id" ,
+                foreignField: "subscriber",
+                as : "subscribedTo"
+            }
+        },
+        {
+            addFields :{
+                subcribersCount :{
+                    $size : "$subscribers"
+                },
+                channelsSubscribedToCOunt :{
+                    $size : "$subscribedTo"
+                },
+                isSubscribed :{
+                    $cond :{
+                        $if : {$in : [req.user?._id , "subscribers.subscriber"]},
+                        then : true ,
+                        else : false 
+                    }
+                }
+            }
+        } ,
+        {
+            $project :{
+                username : 1 ,
+                fullName : 1 ,
+                email : 1 ,
+                avatar : 1 ,
+                coverImage : 1 ,
+                subcribersCount : 1 ,
+                channelsSubscribedToCOunt : 1 ,
+                isSubscribed : 1 
+            }
+        }
+    ])
+
+    if (!channel?.length) {
+        throw new apiError(404 , "Channel does not exists")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200 , channel[0] , "User channel fetched successfully")
+    )
+})
+
+
 export {
     registerUser ,
     loginUser , 
@@ -416,5 +490,6 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChannelProfile
     }
