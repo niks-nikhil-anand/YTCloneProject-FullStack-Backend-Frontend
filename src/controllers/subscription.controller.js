@@ -127,7 +127,60 @@ const getUserChannelSubscribers = asyncHandler(async(req,res) =>{
 })
 
 const getSubscribedChannels = asyncHandler(async(req,res) =>{
+    const {channelId} = req.params
 
+    if (!channelId) {
+        throw new apiError(400 , "ChannelId is required")
+    }
+
+    try {
+
+
+        const subscribedChannel = subscriptions.aggregate([
+            {
+                $match :{
+                    subcriber: new mongoose.Types.ObjectId(channelId)
+                }
+            },
+            {
+                $group :{
+                    _id : "subscriber" ,
+                    subscribedChannel : {$push : "$channel"}
+                }
+            } ,
+            {
+                $project :{
+                    _id : 0,
+                    subscribedChannel : 1
+                }
+            }
+        ])
+
+        if (!subscribedChannel || subscribedChannel.length === 0) {
+            return res
+            .status(200)
+            .json(
+                new apiResponse(
+                    200 , 
+                    [],
+                    "No subscribed channel found for the user"
+                )
+            )
+        }
+
+
+        return res
+        .status(200)
+        .json(
+            new apiResponse(
+                200 ,
+                subscribedChannel ,
+                "All Subscribed channel fetched successfully"
+            )
+        )
+    } catch (error) {
+       throw new apiError(500 , error?.message || "Unable to fetch subscribed channel") 
+    }
 })
 
 export {
