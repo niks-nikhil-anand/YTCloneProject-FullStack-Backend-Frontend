@@ -4,6 +4,7 @@ import {apiResponse} from '../utils/apiResponse'
 import {apiError} from '../utils/apiError'
 import { Playlist } from '../models/playlist.model'
 import {Video} from '../models/video.model'
+import {User} from '../models/user.model'
 
 const isOwnerOfPlaylist = asyncHandler(async(playlistId , userId) =>{
     try {
@@ -368,7 +369,67 @@ const getPlaylistById = asyncHandler(async(req,res) =>{
 })
 
 const getUserPlaylists = asyncHandler(async(req , res) => {
-    
+   const {userId} = req.params
+   
+   if (!userId) {
+    throw new apiError(400 , "User id is required")
+   }
+
+   try {
+    const user = await User.findById(userId)
+
+    if (!user) {
+        throw new apiError(500 , "User not found")
+    }
+
+    const playlist = await Playlist.aggregate([{
+        $match :{
+            owner : user?._id
+        }
+    },
+    {
+        $project :{
+            _id : 1 ,
+            name : 1 ,
+            description : 1 ,
+            owner : 1 ,
+            createdAt : 1 ,
+            updatedAt : 1 ,
+            video : {
+                $cond : {
+                    if:{$eq:["onwer" , new mongoose.Types.ObjectId(req?.user?._id)]},
+                    then : "$video" ,
+                    else :{
+                        $filter : {
+                            input : "$video" ,
+                            as : "video" ,
+                            cond:{
+                                $eq : ["$video.isPublished" , true]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+])
+    if (!playlist) {
+        throw new apiError(404 , "There is no playlist made by this user")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200 , 
+            playlist ,
+            "Playlist fetched successfully"
+        )
+    )
+
+   } catch (error) {
+    throw new apiError(500 , error?.message || "Unable to fetch user playlist")
+   }
 })
 
 export {
