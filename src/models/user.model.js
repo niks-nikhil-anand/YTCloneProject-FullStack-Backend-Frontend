@@ -6,11 +6,11 @@ const userSchema = Schema(
     {
         username:{
           type: String,
-          required : true ,
-          unique : true ,
-          index : true ,
-          lowercase : true ,
-          trim : true  
+          required : true,
+          unique : true,
+          index : true,
+          lowercase : true,
+          trim : true 
         } ,
         email: {
             type : String ,
